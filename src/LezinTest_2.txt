@@ -1,0 +1,21 @@
+set @cnt :=0, @user_id := '';
+select
+    *
+from (
+
+    select
+        *
+        , @cnt := if(user_id = @user_id, @cnt +1, 1) as row_cnt
+        , @user_id := user_id
+    from
+        t_purchase p
+    where
+        user_id in (
+            select user_id from t_user where create_at >= unix_timestamp(date_sub(now(), interval 1 month))
+            )
+    order by user_id asc, updated_at desc
+
+         ) t
+where
+    t.row_cnt < 6
+
